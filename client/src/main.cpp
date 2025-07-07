@@ -1,7 +1,13 @@
-#include <iostream>
+#include "Application.hpp"
+
+int gScreenWidth = 800;
+int gScreenHeight = 450;
 
 int main()
 {
-    std::cout << "HELLO FROM CLIENT" << std::endl;
+    Application app(gScreenWidth, gScreenHeight, "net-pixeld-client");
+
+    app.Run();
+
     return 0;
 }
