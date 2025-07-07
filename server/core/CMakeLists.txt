@@ -1,8 +1,8 @@
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${execName} src/main.cpp)
 
-target_include_directories(${PROJECT_NAME} PRIVATE inc)
+target_include_directories(${execName} PRIVATE inc)
 
 install(
-    TARGETS ${PROJECT_NAME}
+    TARGETS ${execName}
     RUNTIME DESTINATION bin
 )
