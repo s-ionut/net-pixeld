@@ -1,7 +1,9 @@
-#include <iostream>
+#include "Server.hpp"
 
 int main()
 {
-    std::cout << "HELLO FROM SERVER" << std::endl;
+    constexpr uint16_t listenPort = 6000;
+    Server server(listenPort);
+    server.run(); // blocking
     return 0;
 }

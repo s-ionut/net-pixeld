@@ -1,4 +1,8 @@
+#pragma once
+
 #include "raylib-cpp.hpp"
+
+#include "NetworkClient.hpp"
 
 #include <string>
 
@@ -9,6 +13,8 @@ public:
     ~Application() = default;
 
     void Run();
+
+private:
     void Update();
     void Draw();
 
@@ -17,4 +23,6 @@ private:
     uint16_t m_windowWidth;
     uint16_t m_windowHeight;
     raylib::Window m_window;
+
+    NetworkClient m_net;
 };

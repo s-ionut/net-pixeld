@@ -3,9 +3,12 @@ set(execName net-pixeld-client)
 include(${PROJECT_SOURCE_DIR}/vendors/raylib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendors/raylib_cpp.cmake)
 
+find_package(Boost REQUIRED COMPONENTS system)
+
 add_executable(${execName}
     src/main.cpp
     src/Application.cpp
+    src/NetworkClient.cpp
 )
 
 target_include_directories(${execName}
@@ -17,6 +20,7 @@ target_link_libraries(${execName}
     PRIVATE
     raylib
     raylib_cpp
+    Boost::system
 )
 
 install(

@@ -6,8 +6,9 @@ Application::Application(uint16_t width, uint16_t height, std::string windowName
       m_windowName(windowName),
       m_window(m_windowWidth, m_windowHeight, m_windowName)
 {
-
     SetTargetFPS(60);
+
+    m_net.connect("127.0.0.1", 6000);
 }
 
 void Application::Run()
