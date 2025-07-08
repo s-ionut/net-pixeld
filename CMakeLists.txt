@@ -11,6 +11,8 @@ message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_subdirectory(common)
+
 if(MODE STREQUAL "client")
     add_subdirectory(client)
 elseif(MODE STREQUAL "server")

@@ -22,6 +22,27 @@ void Application::Run()
 
 void Application::Update()
 {
+    Packet pkt;
+    while (m_net.pollPacket(pkt))
+    {
+        if (pkt.header.type == MessageType::PositionUpdate)
+        {
+            // std::vector<EntitySate> ents;
+            // PositionPayload pp = deserializePosition(pkt.payload, ents);
+
+            // for (auto &entity : entities)
+            // {
+            //     m_world[e.id] = {e.x, e.y};
+            // }
+        }
+
+        if (pkt.header.type == MessageType::AssignClientId)
+        {
+            AssignClientIdPayload clientIdPayload = deserializeClientId(pkt.payload);
+            m_clientId = clientIdPayload.clientId;
+            std::cout << "CLIENT GOT NEW PLAYER ID: " << static_cast<uint16_t>(m_clientId) << std::endl;
+        }
+    }
 }
 
 void Application::Draw()

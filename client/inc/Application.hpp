@@ -3,8 +3,12 @@
 #include "raylib-cpp.hpp"
 
 #include "NetworkClient.hpp"
+#include "Payload.hpp"
+#include "Deserialize.hpp"
 
+#include <iostream>
 #include <string>
+#include <unordered_map>
 
 class Application
 {
@@ -25,4 +29,8 @@ private:
     raylib::Window m_window;
 
     NetworkClient m_net;
+
+    uint8_t m_clientId;
+
+    std::unordered_map<uint8_t, raylib::Vector2> m_world;
 };

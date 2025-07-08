@@ -46,13 +46,13 @@ void NetworkClient::recvLoop()
 {
     while (m_running)
     {
-        // 1) Read length prefix
+        // Read length prefix
         uint32_t beLen;
         if (!readExactly(&beLen, sizeof(beLen)))
             break;
         uint32_t packetLen = boost::endian::big_to_native(beLen);
 
-        // 2) Read header
+        // Read header
         PacketHeader hdr;
         if (!readExactly(&hdr, sizeof(hdr)))
             break;
@@ -60,7 +60,7 @@ void NetworkClient::recvLoop()
         hdr.sequence = boost::endian::big_to_native(hdr.sequence);
         hdr.payloadLength = boost::endian::big_to_native(hdr.payloadLength);
 
-        // 3) Read payload
+        // Read payload
         std::vector<uint8_t> payload(hdr.payloadLength);
         if (hdr.payloadLength > 0)
         {
@@ -68,7 +68,7 @@ void NetworkClient::recvLoop()
                 break;
         }
 
-        // 4) Queue it up
+        // Add to queue
         Packet pkt{hdr, std::move(payload)};
         {
             std::lock_guard<std::mutex> lk(m_recvMutex);
@@ -107,11 +107,11 @@ void NetworkClient::sendPacket(const Packet &pkt)
     boost::endian::native_to_big_inplace(hdr.sequence);
     boost::endian::native_to_big_inplace(hdr.payloadLength);
 
-    // (length of header + payload)
+    // length prefix (header + payload)
     uint32_t total = static_cast<uint32_t>(sizeof(PacketHeader) + pkt.payload.size());
     boost::endian::native_to_big_inplace(total);
 
-    std::array<uint8_t, sizeof(total)> lenBuf;
+    std::array<uint8_t, sizeof(uint32_t)> lenBuf;
     std::memcpy(lenBuf.data(), &total, sizeof(total));
 
     // [len][hdr][payload]

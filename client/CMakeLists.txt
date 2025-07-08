@@ -9,6 +9,7 @@ add_executable(${execName}
     src/main.cpp
     src/Application.cpp
     src/NetworkClient.cpp
+    src/Deserialize.cpp
 )
 
 target_include_directories(${execName}
@@ -18,6 +19,7 @@ target_include_directories(${execName}
 
 target_link_libraries(${execName} 
     PRIVATE
+    common_lib
     raylib
     raylib_cpp
     Boost::system

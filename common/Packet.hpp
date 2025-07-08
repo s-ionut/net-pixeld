@@ -5,8 +5,10 @@
 
 enum class MessageType : uint8_t
 {
-    Input = 0,
-    CustomEvent = 1,
+    AssignClientId = 0,
+    Input = 1,
+    PositionUpdate = 2,
+    CustomEvent = 3,
     // TODO: add more types
 };
 
