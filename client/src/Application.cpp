@@ -23,29 +23,24 @@ void Application::Run()
 
 void Application::Update()
 {
-    json msg;
+    Protocol::Message msg;
     while (m_net.pollMessage(msg))
     {
-        auto type = msg.value("type", std::string{});
-        if (type == "AssignClientId")
+        if (msg.type == Protocol::MSG_ASSIGN_CLIENT_ID)
         {
-            m_clientId = msg["payload"]["clientId"].get<uint8_t>();
-            LOG_DEBUG("Assigned client ID: %d", int(m_clientId));
+            m_clientId = msg.payload.at("clientId").get<uint8_t>();
+            LOG_DEBUG("Assigned client ID: %u", m_clientId);
         }
-        else if (type == "PositionUpdate")
-        {
-            // expecting payload.entities = [ {id,x,y}, ... ]
-            //     for (auto &ent : msg["payload"]["entities"])
-            //     {
-            //         uint8_t id = ent["id"].get<uint8_t>();
-            //         float x = ent["x"].get<float>();
-            //         float y = ent["y"].get<float>();
-            //         m_world[id] = {x, y};
-            //     }
-        }
+        // else if (msg.type == MSG_POSITION_UPDATE)
+        // {
+        //     uint8_t id = msg.payload.at("clientId").get<uint8_t>();
+        //     float x = msg.payload.at("x").get<float>();
+        //     float y = msg.payload.at("y").get<float>();
+        //     m_world[id] = {x, y};
+        // }
         else
         {
-            LOG_ERROR("Unknown message type: %s", type);
+            LOG_DEBUG("Unknown message type: %s", msg.type.c_str());
         }
     }
 }

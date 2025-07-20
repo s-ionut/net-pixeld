@@ -8,7 +8,7 @@
 #include <functional>
 #include <memory>
 
-using HandlerFn = std::function<void(uint8_t, const json &)>;
+using HandlerFn = std::function<void(uint8_t, const Protocol::Message &)>;
 
 class Server
 {
@@ -23,7 +23,7 @@ private:
     void doAccept();
     void onAccept(boost::system::error_code ec, tcp::socket socket);
     void onClientDisconnect(uint8_t clientId);
-    void onClientMessage(uint8_t clientId, const json &msg);
+    void onClientMessage(uint8_t clientId, const Protocol::Message &msg);
 
     boost::asio::io_context m_ctx;
     tcp::acceptor m_acceptor;

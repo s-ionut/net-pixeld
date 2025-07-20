@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Protocol.hpp"
 #include "Logger.hpp"
 
 #include <boost/asio.hpp>
@@ -17,7 +18,7 @@ using tcp = asio::ip::tcp;
 class Session : public std::enable_shared_from_this<Session>
 {
 public:
-    using MessageCallback = std::function<void(uint8_t, const json &)>;
+    using MessageCallback = std::function<void(uint8_t /*clientId*/, const Protocol::Message & /*msg*/)>;
     using DisconnectCallback = std::function<void(uint8_t)>;
 
     Session(tcp::socket socket,
@@ -27,7 +28,7 @@ public:
 
     ~Session();
     void start();
-    void send(const json &msg);
+    void send(const Protocol::Message &msg);
 
     uint8_t id() const { return m_clientId; }
 

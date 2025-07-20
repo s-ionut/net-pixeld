@@ -26,7 +26,7 @@ void Session::doRead()
     asio::async_read_until(
         m_socket, m_incoming, '\n',
         asio::bind_executor(m_strand,
-                            [this, self](boost::system::error_code ec, std::size_t bytes)
+                            [this, self](boost::system::error_code ec, std::size_t /*bytes*/)
                             {
                                 if (ec)
                                     return m_onDisconnect(m_clientId);
@@ -39,8 +39,8 @@ void Session::doRead()
 
                                 try
                                 {
-                                    auto msg = json::parse(line);
-                                    m_onMessage(m_clientId, msg);
+                                    auto message = Protocol::Message::parse(line);
+                                    m_onMessage(m_clientId, message);
                                 }
                                 catch (std::exception &e)
                                 {
@@ -51,10 +51,9 @@ void Session::doRead()
                             }));
 }
 
-void Session::send(const json &msg)
+void Session::send(const Protocol::Message &msg)
 {
-    auto text = msg.dump();
-    text.push_back('\n');
+    auto text = msg.serialize();
 
     auto self = shared_from_this();
     asio::post(m_strand,

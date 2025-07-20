@@ -1,7 +1,10 @@
 #pragma once
 
 #include "raylib-cpp.hpp"
+
+#include "Protocol.hpp"
 #include "Logger.hpp"
+
 #include "NetworkClient.hpp"
 
 #include <json.hpp>

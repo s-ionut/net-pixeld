@@ -107,7 +107,7 @@ namespace Logger
     do                                                                        \
     {                                                                         \
         std::fprintf(stdout,                                                  \
-                     "[INFO ] %s:%d: " fmt "\n",                              \
+                     "[INFO] %s:%d: " fmt "\n",                               \
                      Logger::getFilename(__FILE__), __LINE__, ##__VA_ARGS__); \
     } while (false)
 

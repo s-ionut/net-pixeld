@@ -61,9 +61,9 @@ void NetworkClient::recvLoop()
 
         try
         {
-            json msg = json::parse(line);
+            auto message = Protocol::Message::parse(line);
             std::lock_guard lk(m_recvMutex);
-            m_recvQueue.push(std::move(msg));
+            m_recvQueue.push(std::move(message));
         }
         catch (const std::exception &e)
         {
@@ -81,7 +81,7 @@ void NetworkClient::sendMessage(const json &msg)
     boost::asio::write(m_socket, boost::asio::buffer(out));
 }
 
-bool NetworkClient::pollMessage(json &out)
+bool NetworkClient::pollMessage(Protocol::Message &out)
 {
     std::lock_guard lk(m_recvMutex);
     if (m_recvQueue.empty())

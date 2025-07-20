@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Protocol.hpp"
 #include "Logger.hpp"
 
 #include <boost/asio.hpp>
@@ -30,7 +31,7 @@ public:
 
     // Poll next message
     // Returns false if none available.
-    bool pollMessage(json &out);
+    bool pollMessage(Protocol::Message &out);
 
     void shutdown();
 
@@ -45,5 +46,5 @@ private:
     std::atomic<bool> m_running{false};
     std::thread m_recvThread;
     std::mutex m_recvMutex;
-    std::queue<json> m_recvQueue;
+    std::queue<Protocol::Message> m_recvQueue;
 };
