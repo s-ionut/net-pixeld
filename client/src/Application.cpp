@@ -1,7 +1,5 @@
 #include "Application.hpp"
 
-using json = nlohmann::json;
-
 Application::Application(uint16_t width, uint16_t height, std::string windowName)
     : m_windowWidth(width), m_windowHeight(height), m_windowName(std::move(windowName)), m_window(m_windowWidth, m_windowHeight, m_windowName)
 {

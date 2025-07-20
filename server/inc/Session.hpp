@@ -4,14 +4,12 @@
 #include "Logger.hpp"
 
 #include <boost/asio.hpp>
-#include <json.hpp>
 
 #include <deque>
 #include <memory>
 #include <functional>
 #include <cstdint>
 
-using json = nlohmann::json;
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 

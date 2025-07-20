@@ -7,8 +7,6 @@
 
 #include "NetworkClient.hpp"
 
-#include <json.hpp>
-
 #include <unordered_map>
 #include <string>
 #include <cstdint>

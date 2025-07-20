@@ -4,7 +4,6 @@
 #include "Logger.hpp"
 
 #include <boost/asio.hpp>
-#include <json.hpp>
 
 #include <mutex>
 #include <thread>
@@ -26,8 +25,7 @@ public:
     // Connect and start receive thread
     bool connect(const std::string &host, uint16_t port);
 
-    // Send message (type/payload/sequence).
-    void sendMessage(const json &msg);
+    void sendMessage(const Protocol::Message &msg);
 
     // Poll next message
     // Returns false if none available.

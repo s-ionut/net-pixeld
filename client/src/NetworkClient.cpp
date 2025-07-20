@@ -73,10 +73,9 @@ void NetworkClient::recvLoop()
     m_running = false;
 }
 
-void NetworkClient::sendMessage(const json &msg)
+void NetworkClient::sendMessage(const Protocol::Message &msg)
 {
-    std::string out = msg.dump();
-    out.push_back('\n');
+    std::string out = msg.serialize();
     std::lock_guard lk(m_sendMutex);
     boost::asio::write(m_socket, boost::asio::buffer(out));
 }
