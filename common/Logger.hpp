@@ -15,14 +15,6 @@ namespace Logger
     }
 } // namespace Logger
 
-#if defined(__GNUC__) || defined(__clang__)
-#define LOGGER_FUNC __PRETTY_FUNCTION__
-#elif defined(_MSC_VER)
-#define LOGGER_FUNC __FUNCSIG__
-#else
-#define LOGGER_FUNC __func__
-#endif
-
 #define LOG_ERROR(fmt, ...)                                                   \
     do                                                                        \
     {                                                                         \
