@@ -6,6 +6,7 @@
 #include "Logger.hpp"
 
 #include "NetworkClient.hpp"
+#include "Player.hpp"
 
 #include <unordered_map>
 #include <string>
@@ -27,5 +28,7 @@ private:
     raylib::Window m_window;
     NetworkClient m_net;
     uint8_t m_clientId = 0;
-    std::unordered_map<uint8_t, raylib::Vector2> m_world;
+    std::unordered_map<std::string, uint32_t> m_lastSeqByType;
+
+    Player m_player;
 };

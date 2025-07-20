@@ -9,6 +9,7 @@ add_executable(${execName}
     src/main.cpp
     src/Application.cpp
     src/NetworkClient.cpp
+    src/Player.cpp
 )
 
 target_include_directories(${execName}

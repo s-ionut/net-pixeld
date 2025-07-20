@@ -1,9 +1,10 @@
 #include "Server.hpp"
 
 Server::Server(uint16_t port)
-    : m_ctx(), m_acceptor(m_ctx, tcp::endpoint(tcp::v4(), port))
+    : m_ctx(), m_acceptor(m_ctx, tcp::endpoint(tcp::v4(), port)), m_resourceTimer(m_ctx)
 {
     m_acceptor.set_option(tcp::acceptor::reuse_address(true));
+    scheduleResourceTick();
 }
 
 void Server::run()
@@ -53,7 +54,7 @@ void Server::onAccept(boost::system::error_code ec, tcp::socket sock)
     Protocol::Message handshake;
 
     handshake.type = Protocol::MSG_ASSIGN_CLIENT_ID;
-    handshake.sequence = 0;
+    handshake.sequence = 1;
     handshake.payload = {{"clientId", id}};
 
     session->send(handshake);
@@ -61,6 +62,47 @@ void Server::onAccept(boost::system::error_code ec, tcp::socket sock)
 
     LOG_DEBUG("New session %d connected", int(id));
     doAccept();
+}
+
+void Server::scheduleResourceTick()
+{
+    m_resourceTimer.expires_after(std::chrono::seconds(1));
+    m_resourceTimer.async_wait(
+        [this](auto ec)
+        { onResourceTick(ec); });
+}
+
+void Server::onResourceTick(boost::system::error_code ec)
+{
+    if (ec)
+    {
+        LOG_ERROR("Timer was canceled on shutdown");
+        return;
+    }
+
+    for (auto &[clientId, session] : m_sessions)
+    {
+        // test
+        auto &pool = m_resources[clientId];
+        pool.wood += 10;
+        pool.food += 10;
+        pool.iron += 10;
+
+        Protocol::Message msg;
+        msg.type = Protocol::MSG_RESOURCE_UPDATE;
+        msg.sequence = ++m_lastSeqByType[clientId]["ResourceUpdate"];
+        msg.payload = {
+            {"clientId", clientId},
+            {"wood", pool.wood},
+            {"food", pool.food},
+            {"iron", pool.iron}};
+
+        LOG_DEBUG("Sent %s type message", Protocol::MSG_RESOURCE_UPDATE);
+
+        session->send(msg);
+    }
+
+    scheduleResourceTick();
 }
 
 void Server::onClientDisconnect(uint8_t clientId)

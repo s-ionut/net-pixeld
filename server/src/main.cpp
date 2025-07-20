@@ -3,8 +3,8 @@
 int main()
 {
     Server server(6000);
-    // server.registerHandler("MovePlayer",
-    //                        [](uint8_t cid, const json &msg)
+    // server.registerHandler("ResourceUpdate",
+    //                        [](uint8_t cId, const json &msg)
     //                        {
     //                            int x = msg["payload"]["x"];
     //                            int y = msg["payload"]["y"];

@@ -6,22 +6,22 @@
 #include <vector>
 
 using json = nlohmann::json;
+
 namespace Protocol
 {
     //-----------------------------------------------------------------------------
-    // 1) All your "type" strings as constexpr
+    // "type" strings as constexpr
     //-----------------------------------------------------------------------------
     inline constexpr char MSG_ASSIGN_CLIENT_ID[] = "AssignClientId";
-    inline constexpr char MSG_POSITION_UPDATE[] = "PositionUpdate";
-    // ? add more as you grow ?
+    inline constexpr char MSG_RESOURCE_UPDATE[] = "ResourceUpdate";
 
     //-----------------------------------------------------------------------------
-    // 2) A small enum for switch?style dispatch (optional)
+    // Enum for switch?style dispatch
     //-----------------------------------------------------------------------------
     enum class MessageType
     {
         AssignClientId,
-        PositionUpdate,
+        ResourceUpdate,
         Unknown
     };
 
@@ -29,21 +29,20 @@ namespace Protocol
     {
         if (s == MSG_ASSIGN_CLIENT_ID)
             return MessageType::AssignClientId;
-        if (s == MSG_POSITION_UPDATE)
-            return MessageType::PositionUpdate;
+        if (s == MSG_RESOURCE_UPDATE)
+            return MessageType::ResourceUpdate;
         return MessageType::Unknown;
     }
 
     //-----------------------------------------------------------------------------
-    // 3) A common wrapper for your JSON messages
+    // Common wrapper for JSON messages
     //-----------------------------------------------------------------------------
     struct Message
     {
-        std::string type; // e.g. "AssignClientId"
+        std::string type;
         uint32_t sequence;
         json payload;
 
-        // Build a JSON blob ready to send
         std::string serialize() const
         {
             json j = {
@@ -53,7 +52,6 @@ namespace Protocol
             return j.dump() + "\n";
         }
 
-        // Parse from a raw JSON string (throws on parse error)
         static Message parse(std::string_view raw)
         {
             auto j = json::parse(raw);
