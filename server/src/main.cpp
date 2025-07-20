@@ -2,8 +2,15 @@
 
 int main()
 {
-    constexpr uint16_t listenPort = 6000;
-    Server server(listenPort);
-    server.run(); // blocking
+    Server server(6000);
+    // server.registerHandler("MovePlayer",
+    //                        [](uint8_t cid, const json &msg)
+    //                        {
+    //                            int x = msg["payload"]["x"];
+    //                            int y = msg["payload"]["y"];
+    //                            // …
+    //                        });
+
+    server.run();
     return 0;
 }

@@ -2,25 +2,28 @@
 
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/endian/conversion.hpp> // for big-endian helpers
-
-#include <iostream>
-#include <array>
-#include <mutex>
-
-using boost::asio::ip::tcp;
 
 NetworkClient::NetworkClient()
-    : m_ioContext(),
-      m_socket(m_ioContext),
-      m_running(false)
+    : m_socket(m_ioContext)
 {
 }
 
 NetworkClient::~NetworkClient()
 {
     shutdown();
+    if (m_recvThread.joinable())
+        m_recvThread.join();
+}
+
+void NetworkClient::shutdown()
+{
+    if (!m_running)
+        return;
+    m_running = false;
+
+    boost::system::error_code ec;
+    m_socket.shutdown(tcp::socket::shutdown_both, ec);
+    m_socket.close(ec);
 }
 
 bool NetworkClient::connect(const std::string &host, uint16_t port)
@@ -30,14 +33,13 @@ bool NetworkClient::connect(const std::string &host, uint16_t port)
         tcp::resolver resolver(m_ioContext);
         auto endpoints = resolver.resolve(host, std::to_string(port));
         boost::asio::connect(m_socket, endpoints);
-
         m_running = true;
         m_recvThread = std::thread(&NetworkClient::recvLoop, this);
         return true;
     }
-    catch (std::exception &e)
+    catch (const std::exception &e)
     {
-        std::cerr << "[NetworkClient::connect][ERROR]: " << e.what() << "\n";
+        LOG_ERROR("%s", e.what());
         return false;
     }
 }
@@ -46,88 +48,45 @@ void NetworkClient::recvLoop()
 {
     while (m_running)
     {
-        // Read length prefix
-        uint32_t beLen;
-        if (!readExactly(&beLen, sizeof(beLen)))
+        boost::system::error_code ec;
+        std::size_t n = boost::asio::read_until(m_socket, m_incoming, '\n', ec);
+        if (ec)
             break;
-        uint32_t packetLen = boost::endian::big_to_native(beLen);
 
-        // Read header
-        PacketHeader hdr;
-        if (!readExactly(&hdr, sizeof(hdr)))
-            break;
-        // convert fields back to host order
-        hdr.sequence = boost::endian::big_to_native(hdr.sequence);
-        hdr.payloadLength = boost::endian::big_to_native(hdr.payloadLength);
+        std::istream is(&m_incoming);
+        std::string line;
+        std::getline(is, line);
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
 
-        // Read payload
-        std::vector<uint8_t> payload(hdr.payloadLength);
-        if (hdr.payloadLength > 0)
+        try
         {
-            if (!readExactly(payload.data(), hdr.payloadLength))
-                break;
+            json msg = json::parse(line);
+            std::lock_guard lk(m_recvMutex);
+            m_recvQueue.push(std::move(msg));
         }
-
-        // Add to queue
-        Packet pkt{hdr, std::move(payload)};
+        catch (const std::exception &e)
         {
-            std::lock_guard<std::mutex> lk(m_recvMutex);
-            m_recvQueue.push(std::move(pkt));
+            LOG_ERROR("JSON parse error: %s", e.what());
         }
     }
+    m_running = false;
 }
 
-bool NetworkClient::readExactly(void *buffer, size_t bytes)
+void NetworkClient::sendMessage(const json &msg)
 {
-    try
-    {
-        boost::asio::read(m_socket, boost::asio::buffer(buffer, bytes));
-        return true;
-    }
-    catch (...)
-    {
-        return false;
-    }
+    std::string out = msg.dump();
+    out.push_back('\n');
+    std::lock_guard lk(m_sendMutex);
+    boost::asio::write(m_socket, boost::asio::buffer(out));
 }
 
-bool NetworkClient::pollPacket(Packet &out)
+bool NetworkClient::pollMessage(json &out)
 {
-    std::lock_guard<std::mutex> lk(m_recvMutex);
+    std::lock_guard lk(m_recvMutex);
     if (m_recvQueue.empty())
         return false;
     out = std::move(m_recvQueue.front());
     m_recvQueue.pop();
     return true;
-}
-
-void NetworkClient::sendPacket(const Packet &pkt)
-{
-    // Prep. PacketHeader
-    PacketHeader hdr = pkt.header;
-    boost::endian::native_to_big_inplace(hdr.sequence);
-    boost::endian::native_to_big_inplace(hdr.payloadLength);
-
-    // length prefix (header + payload)
-    uint32_t total = static_cast<uint32_t>(sizeof(PacketHeader) + pkt.payload.size());
-    boost::endian::native_to_big_inplace(total);
-
-    std::array<uint8_t, sizeof(uint32_t)> lenBuf;
-    std::memcpy(lenBuf.data(), &total, sizeof(total));
-
-    // [len][hdr][payload]
-    std::array<boost::asio::const_buffer, 3> bufs = {
-        boost::asio::buffer(lenBuf),
-        boost::asio::buffer(&hdr, sizeof(hdr)),
-        boost::asio::buffer(pkt.payload)};
-
-    // Send
-    std::lock_guard<std::mutex> lock(m_sendMutex);
-    boost::asio::write(m_socket, bufs);
-}
-
-void NetworkClient::shutdown()
-{
-    boost::system::error_code errCode;
-    m_socket.shutdown(tcp::socket::shutdown_both, errCode);
-    m_socket.close(errCode);
 }

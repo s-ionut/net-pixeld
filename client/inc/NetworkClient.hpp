@@ -1,16 +1,20 @@
 #pragma once
 
-#include "Packet.hpp"
+#include "Logger.hpp"
 
 #include <boost/asio.hpp>
+#include <json.hpp>
 
 #include <mutex>
-#include <vector>
-#include <cstdint>
-#include <string>
-#include <atomic>
 #include <thread>
 #include <queue>
+#include <atomic>
+#include <string>
+#include <cstdint>
+
+using json = nlohmann::json;
+namespace asio = boost::asio;
+using tcp = asio::ip::tcp;
 
 class NetworkClient
 {
@@ -18,25 +22,28 @@ public:
     NetworkClient();
     ~NetworkClient();
 
+    // Connect and start receive thread
     bool connect(const std::string &host, uint16_t port);
-    void sendPacket(const Packet &pkt);
-    bool pollPacket(Packet &out);
+
+    // Send message (type/payload/sequence).
+    void sendMessage(const json &msg);
+
+    // Poll next message
+    // Returns false if none available.
+    bool pollMessage(json &out);
 
     void shutdown();
 
 private:
     void recvLoop();
-    bool readExactly(void *buffer, size_t bytes);
 
-    boost::asio::io_context      m_ioContext;
-    boost::asio::ip::tcp::socket m_socket;
-
-    // Sending
+    asio::io_context m_ioContext;
+    tcp::socket m_socket;
+    asio::streambuf m_incoming;
     std::mutex m_sendMutex;
 
-    // Receiving
-    std::atomic<bool>  m_running;
-    std::thread        m_recvThread;
-    std::mutex         m_recvMutex;
-    std::queue<Packet> m_recvQueue;
+    std::atomic<bool> m_running{false};
+    std::thread m_recvThread;
+    std::mutex m_recvMutex;
+    std::queue<json> m_recvQueue;
 };

@@ -1,50 +1,85 @@
 #include "Session.hpp"
 
-Session::Session(tcp::socket &&skt, uint8_t id)
-    : m_socket(std::move(skt)),
-      m_clientId(id)
+Session::Session(tcp::socket socket,
+                 uint8_t clientId,
+                 MessageCallback onMessage,
+                 DisconnectCallback onDisconnect)
+    : m_socket(std::move(socket)), m_strand(m_socket.get_executor()), m_clientId(clientId), m_onMessage(std::move(onMessage)), m_onDisconnect(std::move(onDisconnect))
 {
-    std::cout << "Created new session ID: " << static_cast<uint16_t>(m_clientId) << std::endl;
 }
 
 Session::~Session()
 {
-    std::cout << "Deleted session: " << static_cast<uint16_t>(m_clientId) << std::endl;
-    boost::system::error_code errCode;
-    m_socket.shutdown(tcp::socket::shutdown_both, errCode);
-    m_socket.close(errCode);
+    boost::system::error_code ec;
+    m_socket.shutdown(tcp::socket::shutdown_both, ec);
+    m_socket.close(ec);
 }
 
-void Session::sendPacket(const Packet &pkt)
+void Session::start()
 {
-    // Prep. header
-    PacketHeader hdr = pkt.header;
-    boost::endian::native_to_big_inplace(hdr.sequence);
-    boost::endian::native_to_big_inplace(hdr.payloadLength);
+    doRead();
+}
 
-    // length prefix (header + payload)
-    uint32_t total = static_cast<uint32_t>(sizeof(PacketHeader) + pkt.payload.size());
-    boost::endian::native_to_big_inplace(total);
-    std::array<uint8_t, sizeof(uint32_t)> lenBuf;
+void Session::doRead()
+{
+    auto self = shared_from_this();
+    asio::async_read_until(
+        m_socket, m_incoming, '\n',
+        asio::bind_executor(m_strand,
+                            [this, self](boost::system::error_code ec, std::size_t bytes)
+                            {
+                                if (ec)
+                                    return m_onDisconnect(m_clientId);
 
-    std::memcpy(lenBuf.data(), &total, sizeof(uint32_t));
+                                std::istream is(&m_incoming);
+                                std::string line;
+                                std::getline(is, line);
+                                if (!line.empty() && line.back() == '\r')
+                                    line.pop_back();
 
-    // [len][hdr][payload]
-    std::array<boost::asio::const_buffer, 3> bufs = {
-        boost::asio::buffer(lenBuf),
-        boost::asio::buffer(&hdr, sizeof(hdr)),
-        boost::asio::buffer(pkt.payload)};
+                                try
+                                {
+                                    auto msg = json::parse(line);
+                                    m_onMessage(m_clientId, msg);
+                                }
+                                catch (std::exception &e)
+                                {
+                                    LOG_ERROR("JSON parse error: %s", e.what());
+                                }
 
-    // Send
-    std::lock_guard<std::mutex> lock(m_sendMutex);
-    try
-    {
-        boost::asio::write(m_socket, bufs);
-    }
-    catch (std::exception &e)
-    {
-        std::cerr << "[Session::sendPacket][Error]: " << e.what() << "\n";
-        // handle disconnect somehow :(
-        m_socket.close();
-    }
+                                doRead();
+                            }));
+}
+
+void Session::send(const json &msg)
+{
+    auto text = msg.dump();
+    text.push_back('\n');
+
+    auto self = shared_from_this();
+    asio::post(m_strand,
+               [this, self, text = std::move(text)]() mutable
+               {
+                   bool busy = !m_outgoing.empty();
+                   m_outgoing.push_back(std::move(text));
+                   if (!busy)
+                       doWrite();
+               });
+}
+
+void Session::doWrite()
+{
+    auto self = shared_from_this();
+    asio::async_write(
+        m_socket,
+        asio::buffer(m_outgoing.front()),
+        asio::bind_executor(m_strand,
+                            [this, self](boost::system::error_code ec, std::size_t)
+                            {
+                                if (ec)
+                                    return m_onDisconnect(m_clientId);
+                                m_outgoing.pop_front();
+                                if (!m_outgoing.empty())
+                                    doWrite();
+                            }));
 }

@@ -1,14 +1,13 @@
 #include "Application.hpp"
 
+using json = nlohmann::json;
+
 Application::Application(uint16_t width, uint16_t height, std::string windowName)
-    : m_windowWidth(width),
-      m_windowHeight(height),
-      m_windowName(windowName),
-      m_window(m_windowWidth, m_windowHeight, m_windowName)
+    : m_windowWidth(width), m_windowHeight(height), m_windowName(std::move(windowName)), m_window(m_windowWidth, m_windowHeight, m_windowName)
 {
     SetTargetFPS(60);
-
-    m_net.connect("127.0.0.1", 6000);
+    if (!m_net.connect("127.0.0.1", 6000))
+        LOG_ERROR("Failed to connect to server");
 }
 
 void Application::Run()
@@ -18,29 +17,35 @@ void Application::Run()
         Update();
         Draw();
     }
+
+    m_net.shutdown();
 }
 
 void Application::Update()
 {
-    Packet pkt;
-    while (m_net.pollPacket(pkt))
+    json msg;
+    while (m_net.pollMessage(msg))
     {
-        if (pkt.header.type == MessageType::PositionUpdate)
+        auto type = msg.value("type", std::string{});
+        if (type == "AssignClientId")
         {
-            // std::vector<EntitySate> ents;
-            // PositionPayload pp = deserializePosition(pkt.payload, ents);
-
-            // for (auto &entity : entities)
-            // {
-            //     m_world[e.id] = {e.x, e.y};
-            // }
+            m_clientId = msg["payload"]["clientId"].get<uint8_t>();
+            LOG_DEBUG("Assigned client ID: %d", int(m_clientId));
         }
-
-        if (pkt.header.type == MessageType::AssignClientId)
+        else if (type == "PositionUpdate")
         {
-            AssignClientIdPayload clientIdPayload = deserializeClientId(pkt.payload);
-            m_clientId = clientIdPayload.clientId;
-            std::cout << "CLIENT GOT NEW PLAYER ID: " << static_cast<uint16_t>(m_clientId) << std::endl;
+            // expecting payload.entities = [ {id,x,y}, ... ]
+            //     for (auto &ent : msg["payload"]["entities"])
+            //     {
+            //         uint8_t id = ent["id"].get<uint8_t>();
+            //         float x = ent["x"].get<float>();
+            //         float y = ent["y"].get<float>();
+            //         m_world[id] = {x, y};
+            //     }
+        }
+        else
+        {
+            LOG_ERROR("Unknown message type: %s", type);
         }
     }
 }
@@ -48,10 +53,9 @@ void Application::Update()
 void Application::Draw()
 {
     BeginDrawing();
-
     m_window.ClearBackground(RAYWHITE);
 
-    DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
+    DrawText(TextFormat("CLIENT"), 200, 200, 12, DARKGRAY);
 
     EndDrawing();
 }

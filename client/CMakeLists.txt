@@ -9,7 +9,6 @@ add_executable(${execName}
     src/main.cpp
     src/Application.cpp
     src/NetworkClient.cpp
-    src/Deserialize.cpp
 )
 
 target_include_directories(${execName}

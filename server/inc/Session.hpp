@@ -1,32 +1,45 @@
 #pragma once
 
-#include "Packet.hpp"
-#include "Payload.hpp"
+#include "Logger.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/asio/write.hpp>
-#include <boost/endian/conversion.hpp>
+#include <json.hpp>
 
+#include <deque>
+#include <memory>
+#include <functional>
 #include <cstdint>
-#include <array>
-#include <cstring>
-#include <iostream>
-#include <mutex>
 
-using boost::asio::ip::tcp;
+using json = nlohmann::json;
+namespace asio = boost::asio;
+using tcp = asio::ip::tcp;
 
-class Session
+class Session : public std::enable_shared_from_this<Session>
 {
 public:
-    Session() = delete;
+    using MessageCallback = std::function<void(uint8_t, const json &)>;
+    using DisconnectCallback = std::function<void(uint8_t)>;
+
+    Session(tcp::socket socket,
+            uint8_t clientId,
+            MessageCallback onMessage,
+            DisconnectCallback onDisconnect);
+
     ~Session();
+    void start();
+    void send(const json &msg);
 
-    Session(tcp::socket &&skt, uint8_t id);
-
-    void sendPacket(const Packet &pkt);
+    uint8_t id() const { return m_clientId; }
 
 private:
+    void doRead();
+    void doWrite();
+
     tcp::socket m_socket;
-    std::mutex m_sendMutex;
+    asio::strand<tcp::socket::executor_type> m_strand;
+    asio::streambuf m_incoming;
+    std::deque<std::string> m_outgoing;
     uint8_t m_clientId;
+    MessageCallback m_onMessage;
+    DisconnectCallback m_onDisconnect;
 };
