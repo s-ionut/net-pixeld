@@ -7,6 +7,9 @@
 
 #include "NetworkClient.hpp"
 #include "Player.hpp"
+#include "SceneManager.hpp"
+#include "GameScene.hpp"
+#include "LoginScene.hpp"
 
 #include <unordered_map>
 #include <string>
@@ -26,9 +29,10 @@ private:
     std::string m_windowName;
     uint16_t m_windowWidth, m_windowHeight;
     raylib::Window m_window;
-    NetworkClient m_net;
-    uint8_t m_clientId = 0;
-    std::unordered_map<std::string, uint32_t> m_lastSeqByType;
+    SceneManager m_scenes;
 
+    NetworkClient m_net;
     Player m_player;
+    GameContext m_ctx;
+    std::deque<Protocol::Message> m_messageQueue;
 };

@@ -2,8 +2,8 @@
 
 #include "json.hpp"
 
-#include <string>
-#include <vector>
+// #include <string>
+// #include <vector>
 
 using json = nlohmann::json;
 
@@ -14,25 +14,8 @@ namespace Protocol
     //-----------------------------------------------------------------------------
     inline constexpr char MSG_ASSIGN_CLIENT_ID[] = "AssignClientId";
     inline constexpr char MSG_RESOURCE_UPDATE[] = "ResourceUpdate";
-
-    //-----------------------------------------------------------------------------
-    // Enum for switch?style dispatch
-    //-----------------------------------------------------------------------------
-    enum class MessageType
-    {
-        AssignClientId,
-        ResourceUpdate,
-        Unknown
-    };
-
-    inline MessageType messageTypeFromString(std::string_view s)
-    {
-        if (s == MSG_ASSIGN_CLIENT_ID)
-            return MessageType::AssignClientId;
-        if (s == MSG_RESOURCE_UPDATE)
-            return MessageType::ResourceUpdate;
-        return MessageType::Unknown;
-    }
+    inline constexpr char MSG_LOGIN_REQUEST[] = "LoginRequest";
+    inline constexpr char MSG_LOGIN_RESULT[] = "LoginResult";
 
     //-----------------------------------------------------------------------------
     // Common wrapper for JSON messages

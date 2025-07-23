@@ -20,6 +20,7 @@ public:
 
     // Register JSON‑type handlers by string
     void registerHandler(std::string type, HandlerFn handler);
+    void sendToClient(uint8_t clientId, const Protocol::Message &msg);
 
 private:
     void doAccept();

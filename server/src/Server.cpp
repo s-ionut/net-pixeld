@@ -105,6 +105,15 @@ void Server::onResourceTick(boost::system::error_code ec)
     scheduleResourceTick();
 }
 
+void Server::sendToClient(uint8_t clientId, const Protocol::Message &msg)
+{
+    auto it = m_sessions.find(clientId);
+    if (it != m_sessions.end())
+    {
+        it->second->send(msg);
+    }
+}
+
 void Server::onClientDisconnect(uint8_t clientId)
 {
     m_sessions.erase(clientId);

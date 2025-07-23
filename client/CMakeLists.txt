@@ -9,6 +9,9 @@ add_executable(${execName}
     src/main.cpp
     src/Application.cpp
     src/NetworkClient.cpp
+    src/SceneManager.cpp
+    src/GameScene.cpp
+    src/LoginScene.cpp
     src/Player.cpp
 )
 
