@@ -2,9 +2,6 @@
 
 #include "json.hpp"
 
-// #include <string>
-// #include <vector>
-
 using json = nlohmann::json;
 
 namespace Protocol
