@@ -9,4 +9,5 @@ struct GameContext
     Player &player;
     NetworkClient &net;
     std::unordered_map<std::string, uint32_t> lastSeqByType;
+    std::string uuid;
 };

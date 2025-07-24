@@ -40,7 +40,8 @@ bool LoginScene::handleMessage(const Protocol::Message &msg)
 {
     if (msg.type == Protocol::MSG_LOGIN_RESULT)
     {
-        LOG_DEBUG("Received login result: %s", msg.type.c_str());
+        m_ctx.uuid = msg.payload.at("uuid").get<std::string>();
+        LOG_DEBUG("LoginScene got uuid=%s", m_ctx.uuid.c_str());
         return true;
     }
 

@@ -62,6 +62,11 @@ void Application::Update()
         }
     }
 
+    if (!m_ctx.uuid.empty())
+    {
+        m_scenes.changeScene(SceneID::Game);
+    }
+
     m_scenes.Update();
 }
 

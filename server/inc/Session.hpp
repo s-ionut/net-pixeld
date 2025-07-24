@@ -29,6 +29,9 @@ public:
     void send(const Protocol::Message &msg);
 
     uint8_t id() const { return m_clientId; }
+    const std::string uuid() const { return m_uuid; }
+
+    void setUUID(std::string &uuid) { m_uuid = uuid; };
 
 private:
     void doRead();
@@ -39,6 +42,7 @@ private:
     asio::streambuf m_incoming;
     std::deque<std::string> m_outgoing;
     uint8_t m_clientId;
+    std::string m_uuid;
     MessageCallback m_onMessage;
     DisconnectCallback m_onDisconnect;
 };

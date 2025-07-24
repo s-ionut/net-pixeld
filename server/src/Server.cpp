@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
-Server::Server(uint16_t port)
-    : m_ctx(), m_acceptor(m_ctx, tcp::endpoint(tcp::v4(), port)), m_resourceTimer(m_ctx)
+Server::Server(uint16_t port, JsonDB &db)
+    : m_ctx(), m_acceptor(m_ctx, tcp::endpoint(tcp::v4(), port)), m_resourceTimer(m_ctx), m_db(db)
 {
     m_acceptor.set_option(tcp::acceptor::reuse_address(true));
     scheduleResourceTick();
@@ -82,24 +82,28 @@ void Server::onResourceTick(boost::system::error_code ec)
 
     for (auto &[clientId, session] : m_sessions)
     {
-        // test
-        auto &pool = m_resources[clientId];
-        pool.wood += 10;
-        pool.food += 10;
-        pool.iron += 10;
+        if (!session->uuid().empty())
+        {
+            // test
+            auto pool = m_db.getResources(session->uuid());
+            pool.wood += 10;
+            pool.food += 10;
+            pool.iron += 10;
 
-        Protocol::Message msg;
-        msg.type = Protocol::MSG_RESOURCE_UPDATE;
-        msg.sequence = ++m_lastSeqByType[clientId]["ResourceUpdate"];
-        msg.payload = {
-            {"clientId", clientId},
-            {"wood", pool.wood},
-            {"food", pool.food},
-            {"iron", pool.iron}};
+            Protocol::Message msg;
+            msg.type = Protocol::MSG_RESOURCE_UPDATE;
+            msg.sequence = ++m_lastSeqByType[clientId]["ResourceUpdate"];
+            msg.payload = {
+                {"uuid", session->uuid()},
+                {"wood", pool.wood},
+                {"food", pool.food},
+                {"iron", pool.iron}};
 
-        LOG_DEBUG("Sent %s type message", Protocol::MSG_RESOURCE_UPDATE);
+            LOG_DEBUG("Sent %s type message", Protocol::MSG_RESOURCE_UPDATE);
 
-        session->send(msg);
+            m_db.updateResources(session->uuid(), pool);
+            session->send(msg);
+        }
     }
 
     scheduleResourceTick();
@@ -112,6 +116,11 @@ void Server::sendToClient(uint8_t clientId, const Protocol::Message &msg)
     {
         it->second->send(msg);
     }
+}
+
+std::shared_ptr<Session> Server::getSession(const uint8_t clientId)
+{
+    return m_sessions[clientId];
 }
 
 void Server::onClientDisconnect(uint8_t clientId)
@@ -131,6 +140,6 @@ void Server::onClientMessage(uint8_t clientId, const Protocol::Message &msg)
     }
     else
     {
-        LOG_ERROR("Unhandled message type '%s' from client %d", type, int(clientId));
+        LOG_ERROR("Unhandled message type '%s' from client %d", type.c_str(), int(clientId));
     }
 }

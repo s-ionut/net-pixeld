@@ -26,8 +26,8 @@ bool GameScene::handleMessage(const Protocol::Message &msg)
 {
     if (msg.type == Protocol::MSG_RESOURCE_UPDATE)
     {
-        uint8_t id = msg.payload.at("clientId").get<uint8_t>();
-        if (id == m_ctx.clientId)
+        std::string uuid = msg.payload.at("uuid").get<std::string>();
+        if (uuid == m_ctx.uuid)
             m_ctx.player.UpdateResources((Resources){msg.payload.at("wood").get<uint64_t>(),
                                                      msg.payload.at("food").get<uint64_t>(),
                                                      msg.payload.at("iron").get<uint64_t>()});
