@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scenes/IScene.hpp"
+#include "gui/Textbox.hpp"
 
 #include "raylib-cpp.hpp"
 
@@ -13,4 +14,11 @@ public:
     void Update() override;
     void Draw() override;
     bool handleMessage(const Protocol::Message &msg) override;
+
+private:
+    std::string m_username;
+    std::string m_pass;
+
+    TextBox m_usernameTextbox;
+    TextBox m_passTextbox;
 };
