@@ -5,11 +5,11 @@
 #include "Protocol.hpp"
 #include "Logger.hpp"
 
-#include "NetworkClient.hpp"
-#include "Player.hpp"
-#include "SceneManager.hpp"
-#include "GameScene.hpp"
-#include "LoginScene.hpp"
+#include "network/NetworkClient.hpp"
+#include "game/Player.hpp"
+#include "scenes/SceneManager.hpp"
+#include "scenes/GameScene.hpp"
+#include "scenes/LoginScene.hpp"
 
 #include <unordered_map>
 #include <string>

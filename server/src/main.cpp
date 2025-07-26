@@ -21,10 +21,13 @@ int main()
                                        LOG_ERROR("Invalid password for %s", user.c_str());
                                        return;
                                    }
+
+                                   LOG_DEBUG("User %s already registered, logging in...", user.c_str());
                                    uuid = db.getUser(user, pass);
                                }
                                else
                                {
+                                   LOG_DEBUG("User %s not registered! Registering and logging in...", user.c_str());
                                    uuid = db.addUser(user, pass);
                                }
 

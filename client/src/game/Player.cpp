@@ -1,4 +1,4 @@
-#include "Player.hpp"
+#include "game/Player.hpp"
 
 Player::Player()
 {

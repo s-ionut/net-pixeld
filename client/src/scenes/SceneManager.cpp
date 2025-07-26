@@ -1,4 +1,4 @@
-#include "SceneManager.hpp"
+#include "scenes/SceneManager.hpp"
 
 void SceneManager::changeScene(SceneID id)
 {

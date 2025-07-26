@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IScene.hpp"
+#include "scenes/IScene.hpp"
 
 #include <memory>
 #include <unordered_map>

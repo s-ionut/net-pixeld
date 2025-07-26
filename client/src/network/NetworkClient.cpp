@@ -1,4 +1,4 @@
-#include "NetworkClient.hpp"
+#include "network/NetworkClient.hpp"
 
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>

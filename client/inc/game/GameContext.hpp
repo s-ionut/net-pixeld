@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Player.hpp"
-#include "NetworkClient.hpp"
+#include "game/Player.hpp"
+#include "network/NetworkClient.hpp"
 
 struct GameContext
 {

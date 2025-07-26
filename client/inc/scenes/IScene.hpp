@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameContext.hpp"
+#include "game/GameContext.hpp"
 
 class IScene
 {

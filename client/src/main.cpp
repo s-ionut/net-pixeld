@@ -1,4 +1,4 @@
-#include "Application.hpp"
+#include "app/Application.hpp"
 
 int gScreenWidth = 800;
 int gScreenHeight = 450;

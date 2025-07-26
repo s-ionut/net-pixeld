@@ -7,12 +7,12 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 add_executable(${execName}
     src/main.cpp
-    src/Application.cpp
-    src/NetworkClient.cpp
-    src/SceneManager.cpp
-    src/GameScene.cpp
-    src/LoginScene.cpp
-    src/Player.cpp
+    src/app/Application.cpp
+    src/network/NetworkClient.cpp
+    src/scenes/SceneManager.cpp
+    src/scenes/GameScene.cpp
+    src/scenes/LoginScene.cpp
+    src/game/Player.cpp
 )
 
 target_include_directories(${execName}

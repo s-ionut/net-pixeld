@@ -1,4 +1,4 @@
-#include "GameScene.hpp"
+#include "scenes/GameScene.hpp"
 
 void GameScene::onEnter()
 {

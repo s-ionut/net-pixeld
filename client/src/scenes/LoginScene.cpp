@@ -1,4 +1,4 @@
-#include "LoginScene.hpp"
+#include "scenes/LoginScene.hpp"
 
 void LoginScene::onEnter()
 {

@@ -1,4 +1,4 @@
-#include "Application.hpp"
+#include "app/Application.hpp"
 
 Application::Application(uint16_t width, uint16_t height, std::string windowName)
     : m_windowWidth(width),
