@@ -20,3 +20,8 @@ elseif(MODE STREQUAL "server")
 else()
     message(FATAL_ERROR "Unknown MODE: ${MODE}. Please specify -DMODE=client or -DMODE=server\nDefault: MODE = client")
 endif()
+
+install(
+    DIRECTORY resources/fonts
+    DESTINATION resources
+)

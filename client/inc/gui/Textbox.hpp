@@ -35,6 +35,7 @@ public:
 
     void SetCenter(const raylib::Vector2 &center);
     void SetDimensions(const raylib::Vector2 &dimensions);
+    void SetFont(std::shared_ptr<CFont> font);
     void SetFocusAnimation(bool enabled);
 
     std::string GetText() const;

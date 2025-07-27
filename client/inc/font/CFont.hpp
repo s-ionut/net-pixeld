@@ -1,24 +1,27 @@
 #pragma once
 
-#include <memory>
+#include "Logger.hpp"
 
 #include "raylib-cpp.hpp"
+
+#include <string>
+#include <memory>
 
 class CFont : public raylib::Font
 {
 public:
     CFont();
-    CFont(std::string path);
+    explicit CFont(const std::string &path);
     ~CFont() = default;
 
-    void setFontSpacing(const float spacing);
-    void setFontSize(const float size);
-    const float getFontSpacing();
-    const float getFontSize();
+    void setFontSpacing(float spacing);
+    void setFontSize(float size);
+
+    float getFontSpacing() const;
+    float getFontSize() const;
 
 private:
     std::string m_path;
-    std::shared_ptr<raylib::Font> m_font;
 
     float m_fontSpacing;
     float m_fontSize;

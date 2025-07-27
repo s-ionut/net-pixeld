@@ -2,6 +2,8 @@
 
 void LoginScene::onEnter()
 {
+    m_font = std::make_shared<CFont>("../resources/fonts/BLKCHCRY.TTF");
+
     m_usernameTextbox.SetCenter({GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f - 50});
     m_usernameTextbox.SetDimensions({200.0f, 40.0f});
     m_usernameTextbox.SetFocusAnimation(true);
@@ -9,6 +11,8 @@ void LoginScene::onEnter()
     m_passTextbox.SetCenter({GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f + 50});
     m_passTextbox.SetDimensions({200.0f, 40.0f});
     m_passTextbox.SetFocusAnimation(true);
+
+    m_usernameTextbox.SetFont(m_font);
 }
 
 void LoginScene::onExit()
@@ -18,7 +22,12 @@ void LoginScene::onExit()
 
 void LoginScene::Update()
 {
-    static bool test = true;
+    // TEMP: reposition on window resize --
+    m_passTextbox.SetCenter({GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f + 50});
+    m_passTextbox.SetDimensions({200.0f, 40.0f});
+
+    m_usernameTextbox.SetCenter({GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f - 50});
+    m_usernameTextbox.SetDimensions({200.0f, 40.0f});
 
     m_usernameTextbox.Update();
     m_passTextbox.Update();
@@ -38,8 +47,6 @@ void LoginScene::Update()
         LOG_DEBUG("Sent %s type message", Protocol::MSG_LOGIN_REQUEST);
 
         m_ctx.net.sendMessage(msg);
-
-        test = false;
     }
 }
 

@@ -19,6 +19,8 @@ private:
     std::string m_username;
     std::string m_pass;
 
+    std::shared_ptr<CFont> m_font;
+
     TextBox m_usernameTextbox;
     TextBox m_passTextbox;
 };

@@ -1,34 +1,43 @@
 #include "font/CFont.hpp"
 
-CFont::CFont()
+CFont::CFont() = default;
+
+CFont::CFont(const std::string &path)
+    : m_path(path), m_fontSpacing(1.0f), m_fontSize(20.0f)
 {
-    m_font = std::make_shared<raylib::Font>();
-
-    m_fontSize = 10;
-    m_fontSpacing = 1;
-};
-
-CFont::CFont(std::string path)
-{
-    m_path = path;
-
     try
     {
-        m_font->Load(m_path);
+        raylib::Font f = ::LoadFontEx(path.c_str(), static_cast<int>(m_fontSize), nullptr, 0);
+        if (f.texture.id == 0)
+        {
+            throw raylib::RaylibException("Failed to load FontEx: " + m_path);
+        }
+
+        SetTextureFilter(f.texture, TEXTURE_FILTER_BILINEAR);
+        static_cast<raylib::Font &>(*this) = std::move(f);
     }
     catch (const raylib::RaylibException &error)
     {
-        TraceLog(LOG_WARNING, "Failed to load font: %s", error.what());
+        LOG_ERROR("Failed to load font: %s", error.what());
     }
+}
 
-    m_fontSize = 10;
-    m_fontSpacing = 1;
-};
+void CFont::setFontSpacing(float spacing)
+{
+    m_fontSpacing = spacing;
+}
 
-void CFont::setFontSpacing(const float spacing) { m_fontSpacing = spacing; };
+void CFont::setFontSize(float size)
+{
+    m_fontSize = size;
+}
 
-void CFont::setFontSize(const float size) { m_fontSize = size; };
+float CFont::getFontSpacing() const
+{
+    return m_fontSpacing;
+}
 
-const float CFont::getFontSpacing() { return m_fontSpacing; };
-
-const float CFont::getFontSize() { return m_fontSize; };
+float CFont::getFontSize() const
+{
+    return m_fontSize;
+}

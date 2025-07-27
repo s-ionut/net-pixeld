@@ -38,6 +38,11 @@ void TextBox::SetDimensions(const raylib::Vector2 &dimensions)
     m_baseSize = dimensions;
 }
 
+void TextBox::SetFont(std::shared_ptr<CFont> font)
+{
+    m_font = std::move(font);
+}
+
 void TextBox::SetFocusAnimation(bool enabled)
 {
     m_animateFocus = enabled;
