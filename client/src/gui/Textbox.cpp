@@ -93,11 +93,6 @@ void TextBox::HandleInput()
     {
         m_inputText.pop_back();
     }
-
-    if (IsKeyPressed(KEY_ENTER))
-    {
-        m_finalReturnText = m_inputText;
-    }
 }
 
 void TextBox::UpdateState()
@@ -175,7 +170,7 @@ raylib::Rectangle TextBox::GetTransformedBounds() const
 
 std::string TextBox::GetText() const
 {
-    return m_finalReturnText;
+    return m_inputText;
 }
 
 raylib::Texture TextBox::CreateFallbackTexture()

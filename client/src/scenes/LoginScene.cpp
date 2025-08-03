@@ -13,6 +13,29 @@ void LoginScene::onEnter()
     m_passTextbox.SetFocusAnimation(true);
 
     m_usernameTextbox.SetFont(m_font);
+    m_passTextbox.SetFont(m_font);
+
+    m_loginButton.SetCallbacks(
+        [this]()
+        {
+            if (!m_username.empty() && !m_pass.empty())
+            {
+                Protocol::Message msg;
+                msg.type = Protocol::MSG_LOGIN_REQUEST;
+                msg.sequence = 1;
+                msg.payload = {
+                    {"id", m_username},
+                    {"password", m_pass}};
+
+                LOG_DEBUG("Sent %s type message", Protocol::MSG_LOGIN_REQUEST);
+
+                m_ctx.net.sendMessage(msg);
+            }
+        },
+        []()
+        { LOG_DEBUG("hovered"); },
+        []()
+        { LOG_DEBUG("released"); });
 }
 
 void LoginScene::onExit()
@@ -34,20 +57,8 @@ void LoginScene::Update()
 
     m_username = m_usernameTextbox.GetText();
     m_pass = m_passTextbox.GetText();
-
-    if (!m_username.empty() && !m_pass.empty())
-    {
-        Protocol::Message msg;
-        msg.type = Protocol::MSG_LOGIN_REQUEST;
-        msg.sequence = 1;
-        msg.payload = {
-            {"id", m_username},
-            {"password", m_pass}};
-
-        LOG_DEBUG("Sent %s type message", Protocol::MSG_LOGIN_REQUEST);
-
-        m_ctx.net.sendMessage(msg);
-    }
+    
+    m_loginButton.Update();
 }
 
 void LoginScene::Draw()
@@ -55,6 +66,7 @@ void LoginScene::Draw()
     DrawText(TextFormat("LOGIN"), GetScreenWidth() / 2 - 50, 10, 30, DARKGRAY);
     m_usernameTextbox.Draw();
     m_passTextbox.Draw();
+    m_loginButton.Draw();
 }
 
 bool LoginScene::handleMessage(const Protocol::Message &msg)

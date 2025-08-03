@@ -55,7 +55,6 @@ private:
 
     std::string m_inputText;
     std::string m_outputText;
-    std::string m_finalReturnText;
 
     raylib::Vector2 m_position; // Center position
     raylib::Vector2 m_baseSize; // Original size

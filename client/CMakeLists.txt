@@ -8,6 +8,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 add_executable(${execName}
     src/main.cpp
     src/font/CFont.cpp
+    src/gui/Button.cpp
     src/gui/Textbox.cpp
     src/app/Timer.cpp
     src/app/Application.cpp
